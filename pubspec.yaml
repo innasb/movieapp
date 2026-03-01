@@ -49,6 +49,7 @@ dependencies:
   easy_localization: ^3.0.8
   webview_flutter_android: ^4.10.13
   webview_flutter_wkwebview: ^3.23.8
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +75,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - .env
     - assets/translations/
 
   # An image asset can refer to one or more resolution-specific "variants", see
