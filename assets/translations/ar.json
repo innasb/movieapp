@@ -1,0 +1,23 @@
+{
+    "settings": "الإعدادات",
+    "preferences": "التفضيلات",
+    "dark_mode": "الوضع الداكن",
+    "light_mode": "الوضع الفاتح",
+    "notifications": "الإشعارات",
+    "language": "اللغة",
+    "account": "الحساب",
+    "edit_profile": "تعديل الملف الشخصي",
+    "security": "الأمان",
+    "info": "معلومات",
+    "developed_by": "تم تطويره من قبل ايناس",
+    "version": "الإصدار 1.0.0",
+    "home": "الرئيسية",
+    "movies": "الأفلام",
+    "search_movies": "ابحث عن الأفلام...",
+    "no_movies_found": "لا توجد أفلام",
+    "trending_now": "شائع الآن",
+    "top_rated": "الأعلى تقييمًا",
+    "recent_movies": "أفلام حديثة",
+    "play_now": "شاهد الآن",
+    "overview": "نظرة عامة"
+}

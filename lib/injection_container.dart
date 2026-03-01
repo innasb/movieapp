@@ -1,0 +1,72 @@
+import 'package:get_it/get_it.dart';
+import 'package:talker_flutter/talker_flutter.dart';
+import 'package:talker_bloc_logger/talker_bloc_logger.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'core/network/api_client.dart';
+import 'data/datasources/movie_remote_data_source.dart';
+import 'data/repositories/movie_repository_impl.dart';
+import 'domain/repositories/movie_repository.dart';
+import 'domain/usecases/get_categories.dart';
+import 'domain/usecases/get_movie_detail.dart';
+import 'domain/usecases/get_movies_by_category.dart';
+import 'domain/usecases/get_recent_movies.dart';
+import 'domain/usecases/get_trending_movies.dart';
+import 'domain/usecases/get_top_rated_movies.dart';
+import 'domain/usecases/search_movies.dart';
+import 'presentation/cubits/home_cubit.dart';
+import 'presentation/cubits/movie_detail_cubit.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
+import 'presentation/cubits/settings_cubit.dart';
+
+final sl = GetIt.instance;
+
+Future<void> init() async {
+  // Shared Preferences
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerLazySingleton(() => sharedPreferences);
+
+  // Talker Config
+  final talker = TalkerFlutter.init();
+  sl.registerLazySingleton(() => talker);
+
+  Bloc.observer = TalkerBlocObserver(talker: talker);
+
+  // Cubits
+  sl.registerFactory(() => SettingsCubit(sl()));
+  sl.registerFactory(
+    () => HomeCubit(
+      getRecentMovies: sl(),
+      getTrendingMovies: sl(),
+      getTopRatedMovies: sl(),
+      getCategories: sl(),
+      getMoviesByCategory: sl(),
+      searchMovies: sl(),
+      talker: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => MovieDetailCubit(getMovieDetail: sl(), talker: sl()),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton(() => GetRecentMovies(sl()));
+  sl.registerLazySingleton(() => GetTrendingMovies(sl()));
+  sl.registerLazySingleton(() => GetTopRatedMovies(sl()));
+  sl.registerLazySingleton(() => GetCategories(sl()));
+  sl.registerLazySingleton(() => GetMoviesByCategory(sl()));
+  sl.registerLazySingleton(() => GetMovieDetail(sl()));
+  sl.registerLazySingleton(() => SearchMovies(sl()));
+
+  // Repository
+  sl.registerLazySingleton<MovieRepository>(() => MovieRepositoryImpl(sl()));
+
+  // Data Sources
+  sl.registerLazySingleton<MovieRemoteDataSource>(
+    () => MovieRemoteDataSourceImpl(sl(), sl()),
+  );
+
+  // Core
+  sl.registerLazySingleton(() => ApiClient(sl()));
+}

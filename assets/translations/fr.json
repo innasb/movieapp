@@ -1,0 +1,23 @@
+{
+    "settings": "Paramètres",
+    "preferences": "Préférences",
+    "dark_mode": "Mode sombre",
+    "light_mode": "Mode clair",
+    "notifications": "Notifications",
+    "language": "Langue",
+    "account": "Compte",
+    "edit_profile": "Modifier le profil",
+    "security": "Sécurité",
+    "info": "Info",
+    "developed_by": "Développé par innas",
+    "version": "Version 1.0.0",
+    "home": "Accueil",
+    "movies": "Films",
+    "search_movies": "Rechercher des films...",
+    "no_movies_found": "Aucun film trouvé",
+    "trending_now": "Tendances",
+    "top_rated": "Les Mieux Notés",
+    "recent_movies": "Films Récents",
+    "play_now": "Jouer",
+    "overview": "Aperçu"
+}

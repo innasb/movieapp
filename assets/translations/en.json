@@ -1,0 +1,23 @@
+{
+    "settings": "Settings",
+    "preferences": "Preferences",
+    "dark_mode": "Dark Mode",
+    "light_mode": "Light Mode",
+    "notifications": "Notifications",
+    "language": "Language",
+    "account": "Account",
+    "edit_profile": "Edit Profile",
+    "security": "Security",
+    "info": "Info",
+    "developed_by": "Developed by innas",
+    "version": "Version 1.0.0",
+    "home": "Home",
+    "movies": "Movies",
+    "search_movies": "Search movies...",
+    "no_movies_found": "No movies found",
+    "trending_now": "Trending Now",
+    "top_rated": "Top Rated",
+    "recent_movies": "Recent Movies",
+    "play_now": "Play Now",
+    "overview": "Overview"
+}
