@@ -19,5 +19,10 @@
     "top_rated": "Top Rated",
     "recent_movies": "Recent Movies",
     "play_now": "Play Now",
-    "overview": "Overview"
+    "overview": "Overview",
+    "tv_shows": "TV Shows",
+    "seasons": "Seasons",
+    "episodes": "Episodes",
+    "search_tv_shows": "Search TV shows...",
+    "no_tv_shows_found": "No TV shows found"
 }

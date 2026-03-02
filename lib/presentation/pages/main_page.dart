@@ -49,6 +49,11 @@ class MainPage extends StatelessWidget {
               label: 'home'.tr(),
             ),
             BottomNavigationBarItem(
+              icon: const Icon(Icons.tv_outlined),
+              activeIcon: const Icon(Icons.tv),
+              label: 'tv_shows'.tr(),
+            ),
+            BottomNavigationBarItem(
               icon: const Icon(Icons.settings_outlined),
               activeIcon: const Icon(Icons.settings),
               label: 'settings'.tr(),

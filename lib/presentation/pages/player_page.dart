@@ -6,8 +6,17 @@ import '../../core/utils/config.dart';
 
 class PlayerPage extends StatefulWidget {
   final int id; // TMDB ID
+  final bool isMovie;
+  final int? season;
+  final int? episode;
 
-  const PlayerPage({super.key, required this.id});
+  const PlayerPage({
+    super.key, 
+    required this.id, 
+    this.isMovie = true,
+    this.season,
+    this.episode,
+  });
 
   @override
   State<PlayerPage> createState() => _PlayerPageState();
@@ -159,7 +168,12 @@ class _PlayerPageState extends State<PlayerPage> {
   void initState() {
     super.initState();
 
-    final videoUrl = '${Config.vidsrcBaseUrl}/embed/movie?tmdb=${widget.id}';
+    final String videoUrl;
+    if (widget.isMovie) {
+      videoUrl = '${Config.vidsrcBaseUrl}/embed/movie?tmdb=${widget.id}';
+    } else {
+      videoUrl = '${Config.vidsrcBaseUrl}/embed/tv?tmdb=${widget.id}&season=${widget.season}&episode=${widget.episode}';
+    }
 
     late final PlatformWebViewControllerCreationParams params;
     if (WebViewPlatform.instance is WebKitWebViewPlatform) {

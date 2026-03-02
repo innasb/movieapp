@@ -19,5 +19,10 @@
     "top_rated": "الأعلى تقييمًا",
     "recent_movies": "أفلام حديثة",
     "play_now": "شاهد الآن",
-    "overview": "نظرة عامة"
+    "overview": "نظرة عامة",
+    "tv_shows": "برامج تلفزيونية",
+    "seasons": "مواسم",
+    "episodes": "حلقات",
+    "search_tv_shows": "ابحث عن برامج تلفزيونية...",
+    "no_tv_shows_found": "لا توجد برامج تلفزيونية"
 }

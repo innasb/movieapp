@@ -17,6 +17,16 @@ import 'domain/usecases/search_movies.dart';
 import 'presentation/cubits/home_cubit.dart';
 import 'presentation/cubits/movie_detail_cubit.dart';
 
+import 'data/datasources/tv_remote_data_source.dart';
+import 'data/repositories/tv_repository_impl.dart';
+import 'domain/repositories/tv_repository.dart';
+import 'domain/usecases/get_season_episodes.dart';
+import 'domain/usecases/get_tv_show_detail.dart';
+import 'domain/usecases/get_trending_tv_shows.dart';
+import 'domain/usecases/get_top_rated_tv_shows.dart';
+import 'domain/usecases/search_tv_shows.dart';
+import 'presentation/cubits/tv_shows_cubit.dart';
+import 'presentation/cubits/tv_show_detail_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'presentation/cubits/settings_cubit.dart';
 
@@ -49,6 +59,21 @@ Future<void> init() async {
   sl.registerFactory(
     () => MovieDetailCubit(getMovieDetail: sl(), talker: sl()),
   );
+  sl.registerFactory(
+    () => TvShowsCubit(
+      getTrendingTvShows: sl(),
+      getTopRatedTvShows: sl(),
+      searchTvShows: sl(),
+      talker: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => TvShowDetailCubit(
+      getTvShowDetail: sl(),
+      getSeasonEpisodes: sl(),
+      talker: sl(),
+    ),
+  );
 
   // Use Cases
   sl.registerLazySingleton(() => GetRecentMovies(sl()));
@@ -58,13 +83,23 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetMoviesByCategory(sl()));
   sl.registerLazySingleton(() => GetMovieDetail(sl()));
   sl.registerLazySingleton(() => SearchMovies(sl()));
+  
+  sl.registerLazySingleton(() => GetTrendingTvShows(sl()));
+  sl.registerLazySingleton(() => GetTopRatedTvShows(sl()));
+  sl.registerLazySingleton(() => GetTvShowDetail(sl()));
+  sl.registerLazySingleton(() => GetSeasonEpisodes(sl()));
+  sl.registerLazySingleton(() => SearchTvShows(sl()));
 
   // Repository
   sl.registerLazySingleton<MovieRepository>(() => MovieRepositoryImpl(sl()));
+  sl.registerLazySingleton<TvRepository>(() => TvRepositoryImpl(remoteDataSource: sl()));
 
   // Data Sources
   sl.registerLazySingleton<MovieRemoteDataSource>(
     () => MovieRemoteDataSourceImpl(sl(), sl()),
+  );
+  sl.registerLazySingleton<TvRemoteDataSource>(
+    () => TvRemoteDataSourceImpl(sl(), sl()),
   );
 
   // Core

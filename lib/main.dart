@@ -12,6 +12,8 @@ import 'presentation/pages/detail_page.dart';
 import 'presentation/pages/player_page.dart';
 import 'presentation/pages/main_page.dart';
 import 'presentation/pages/settings_page.dart';
+import 'presentation/pages/tv_shows_page.dart';
+import 'presentation/pages/tv_show_detail_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -51,6 +53,14 @@ final GoRouter _router = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
+              path: '/tv_shows',
+              builder: (context, state) => const TvShowsPage(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
               path: '/settings',
               builder: (context, state) => const SettingsPage(),
             ),
@@ -67,11 +77,29 @@ final GoRouter _router = GoRouter(
       },
     ),
     GoRoute(
+      path: '/tv_detail/:id',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+        return TvShowDetailPage(tvShowId: id);
+      },
+    ),
+    GoRoute(
       path: '/player/:id',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) {
         final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
-        return PlayerPage(id: id);
+        return PlayerPage(id: id, isMovie: true);
+      },
+    ),
+    GoRoute(
+      path: '/player/tv/:id/:s/:e',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+        final s = int.tryParse(state.pathParameters['s'] ?? '') ?? 1;
+        final e = int.tryParse(state.pathParameters['e'] ?? '') ?? 1;
+        return PlayerPage(id: id, isMovie: false, season: s, episode: e);
       },
     ),
   ],

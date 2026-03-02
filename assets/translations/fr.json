@@ -19,5 +19,10 @@
     "top_rated": "Les Mieux Notés",
     "recent_movies": "Films Récents",
     "play_now": "Jouer",
-    "overview": "Aperçu"
+    "overview": "Aperçu",
+    "tv_shows": "Séries TV",
+    "seasons": "Saisons",
+    "episodes": "Épisodes",
+    "search_tv_shows": "Rechercher des séries TV...",
+    "no_tv_shows_found": "Aucune série TV trouvée"
 }
