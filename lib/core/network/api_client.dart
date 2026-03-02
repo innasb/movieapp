@@ -10,10 +10,18 @@ class ApiClient {
   ApiClient(this._talker)
       : _dio = Dio(BaseOptions(
           baseUrl: Config.tmdbBaseUrl,
-          queryParameters: {'api_key': Config.tmdbApiKey},
           connectTimeout: const Duration(seconds: 10),
           receiveTimeout: const Duration(seconds: 10),
         )) {
+    // Add API key interceptor so it's fetched at request time, not instantiate time
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          options.queryParameters['api_key'] = Config.tmdbApiKey;
+          return handler.next(options);
+        },
+      ),
+    );
     _dio.interceptors.add(TalkerDioLogger(
         talker: _talker,
         settings: const TalkerDioLoggerSettings(
