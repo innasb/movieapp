@@ -26,7 +26,7 @@ jobs:
           channel: 'stable'
 
       - name: Create .env file
-        run: echo "TMDB_API_KEY=26d27688ea19f5f4ce1a5bab29b88a36" > .env
+        run: echo "TMDB_API_KEY" > .env
 
       - name: Install dependencies
         run: flutter pub get
