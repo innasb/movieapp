@@ -30,6 +30,16 @@ import 'presentation/cubits/tv_show_detail_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'presentation/cubits/settings_cubit.dart';
 
+// Anime imports
+import 'data/datasources/anime_remote_data_source.dart';
+import 'data/repositories/anime_repository_impl.dart';
+import 'domain/repositories/anime_repository.dart';
+import 'domain/usecases/get_top_anime.dart';
+import 'domain/usecases/search_anime.dart';
+import 'domain/usecases/get_anime_detail.dart';
+import 'presentation/cubits/anime_cubit.dart';
+import 'presentation/cubits/anime_detail_cubit.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -74,6 +84,19 @@ Future<void> init() async {
       talker: sl(),
     ),
   );
+  sl.registerFactory(
+    () => AnimeCubit(
+      getTopAnime: sl(),
+      searchAnime: sl(),
+      talker: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => AnimeDetailCubit(
+      getAnimeDetail: sl(),
+      talker: sl(),
+    ),
+  );
 
   // Use Cases
   sl.registerLazySingleton(() => GetRecentMovies(sl()));
@@ -90,9 +113,14 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetSeasonEpisodes(sl()));
   sl.registerLazySingleton(() => SearchTvShows(sl()));
 
+  sl.registerLazySingleton(() => GetTopAnime(sl()));
+  sl.registerLazySingleton(() => SearchAnime(sl()));
+  sl.registerLazySingleton(() => GetAnimeDetail(sl()));
+
   // Repository
   sl.registerLazySingleton<MovieRepository>(() => MovieRepositoryImpl(sl()));
   sl.registerLazySingleton<TvRepository>(() => TvRepositoryImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton<AnimeRepository>(() => AnimeRepositoryImpl(remoteDataSource: sl()));
 
   // Data Sources
   sl.registerLazySingleton<MovieRemoteDataSource>(
@@ -100,6 +128,9 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<TvRemoteDataSource>(
     () => TvRemoteDataSourceImpl(sl(), sl()),
+  );
+  sl.registerLazySingleton<AnimeRemoteDataSource>(
+    () => AnimeRemoteDataSourceImpl(sl()),
   );
 
   // Core

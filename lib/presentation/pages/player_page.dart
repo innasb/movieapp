@@ -5,10 +5,13 @@ import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 import '../../core/utils/config.dart';
 
 class PlayerPage extends StatefulWidget {
-  final int id; // TMDB ID
+  final int id; // TMDB ID or MAL ID
   final bool isMovie;
   final int? season;
   final int? episode;
+  final bool isAnime;
+  final int? episodeNumber; // Anime episode number
+  final String subOrDub; // 'sub' or 'dub'
 
   const PlayerPage({
     super.key, 
@@ -16,6 +19,9 @@ class PlayerPage extends StatefulWidget {
     this.isMovie = true,
     this.season,
     this.episode,
+    this.isAnime = false,
+    this.episodeNumber,
+    this.subOrDub = 'sub',
   });
 
   @override
@@ -28,19 +34,6 @@ class _PlayerPageState extends State<PlayerPage> {
 
   // Domains allowed to load (the video source + its CDNs)
   static const _allowedHosts = [
-    'vidsrc-embed.ru',
-    'vidsrc.ru',
-    'vidsrc.me',
-    'vidsrc.to',
-    'vidsrc.net',
-    'vidsrc.in',
-    'vidsrc.pm',
-    'vidsrc.xyz',
-    'vidsrc.stream',
-    'vsembed.ru',
-    'multiembed.mov',
-    'embedsu.com',
-    'blackvid.space',
     'vidlink.pro',
     'vidplay.online',
     'vidplay.site',
@@ -48,15 +41,14 @@ class _PlayerPageState extends State<PlayerPage> {
     'rabbitstream.net',
     'megacloud.tv',
     'rapid-cloud.co',
+    'multiembed.mov',
+    'embedsu.com',
   ];
 
-  /// JS that removes common ad/popup overlays and disables window.open
+  /// Minimal JS to ensure the player fills the WebView cleanly.
+  /// VidLink is a clean player — no aggressive ad-blocking needed.
   static const _adBlockScript = '''
     (function() {
-      // Override window.open to block popup windows
-      window.open = function() { return null; };
-
-      // Make the page UI match a pure video player
       const style = document.createElement('style');
       style.innerHTML = `
         body, html {
@@ -75,76 +67,8 @@ class _PlayerPageState extends State<PlayerPage> {
           top: 0 !important;
           left: 0 !important;
         }
-        /* Hide logos, watermarks, and unnecessary UI elements */
-        .jw-logo, .jw-watermark, .vjs-watermark, .vjs-logo, 
-        img[src*="vidsrc"], img[src*="logo"], a[href*="vidsrc"],
-        .jw-title, .vjs-title-bar, #logo, .logo {
-          display: none !important;
-          opacity: 0 !important;
-          pointer-events: none !important;
-          visibility: hidden !important;
-        }
-        /* Hide common popup/ad containers */
-        .ad-container, .ads-container, .popup, .overlay {
-          display: none !important;
-        }
       `;
       document.head.appendChild(style);
-
-      function removeAdsAndLogos() {
-        const adSelectors = [
-          'iframe[src*="ads"]',
-          'iframe[src*="banner"]',
-          'div[class*="ad-"]',
-          'div[class*="ads-"]',
-          'div[class*="popup"]',
-          'div[class*="overlay"]',
-          'div[id*="ad-"]',
-          'div[id*="ads-"]',
-          'div[id*="popup"]',
-          'a[target="_blank"][rel*="nofollow"]'
-        ];
-        
-        for (const sel of adSelectors) {
-          document.querySelectorAll(sel).forEach(el => {
-            // Don't remove the actual video player iframe
-            if (el.tagName === 'IFRAME' && el.src && 
-                (el.src.includes('vidsrc') || el.src.includes('embed'))) return;
-            el.remove();
-          });
-        }
-      }
-
-      function attemptAutoPlay() {
-        // Try starting video
-        const videos = document.querySelectorAll('video');
-        videos.forEach(v => {
-          v.muted = false;
-          v.play().catch(e => console.log('Autoplay error', e));
-        });
-        
-        // Try clicking play buttons
-        const playBtns = document.querySelectorAll('.jw-icon-display, .jw-icon-playback, .vjs-big-play-button');
-        playBtns.forEach(b => b.click());
-      }
-
-      removeAdsAndLogos();
-      setTimeout(attemptAutoPlay, 500);
-
-      // Re-run periodically to catch dynamically injected content
-      setInterval(() => {
-        removeAdsAndLogos();
-        attemptAutoPlay();
-      }, 1000);
-
-      // Block click-hijacking: stop clicks that try to open new tabs
-      document.addEventListener('click', function(e) {
-        const t = e.target.closest('a');
-        if (t && t.target === '_blank') {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      }, true);
     })();
   ''';
 
@@ -169,10 +93,12 @@ class _PlayerPageState extends State<PlayerPage> {
     super.initState();
 
     final String videoUrl;
-    if (widget.isMovie) {
-      videoUrl = '${Config.vidsrcBaseUrl}/embed/movie?tmdb=${widget.id}';
+    if (widget.isAnime) {
+      videoUrl = '${Config.vidlinkBaseUrl}/anime/${widget.id}/${widget.episodeNumber}/${widget.subOrDub}?primaryColor=E50914&autoplay=true&fallback=true';
+    } else if (widget.isMovie) {
+      videoUrl = '${Config.vidlinkBaseUrl}/movie/${widget.id}?primaryColor=E50914&autoplay=true';
     } else {
-      videoUrl = '${Config.vidsrcBaseUrl}/embed/tv?tmdb=${widget.id}&season=${widget.season}&episode=${widget.episode}';
+      videoUrl = '${Config.vidlinkBaseUrl}/tv/${widget.id}/${widget.season}/${widget.episode}?primaryColor=E50914&autoplay=true&nextbutton=true';
     }
 
     late final PlatformWebViewControllerCreationParams params;

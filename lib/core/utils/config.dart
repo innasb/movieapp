@@ -8,5 +8,7 @@ class Config {
   static const String tmdbImageBaseUrlOrig =
       'https://image.tmdb.org/t/p/original';
 
-  static const String vidsrcBaseUrl = 'https://vidsrc-embed.ru';
+  static const String vidlinkBaseUrl = 'https://vidlink.pro';
+
+  static const String jikanBaseUrl = 'https://api.jikan.moe/v4';
 }

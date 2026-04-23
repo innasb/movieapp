@@ -14,6 +14,8 @@ import 'presentation/pages/main_page.dart';
 import 'presentation/pages/settings_page.dart';
 import 'presentation/pages/tv_shows_page.dart';
 import 'presentation/pages/tv_show_detail_page.dart';
+import 'presentation/pages/anime_page.dart';
+import 'presentation/pages/anime_detail_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -61,6 +63,14 @@ final GoRouter _router = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
+              path: '/anime',
+              builder: (context, state) => const AnimePage(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
               path: '/settings',
               builder: (context, state) => const SettingsPage(),
             ),
@@ -85,6 +95,14 @@ final GoRouter _router = GoRouter(
       },
     ),
     GoRoute(
+      path: '/anime_detail/:id',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+        return AnimeDetailPage(malId: id);
+      },
+    ),
+    GoRoute(
       path: '/player/:id',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) {
@@ -100,6 +118,21 @@ final GoRouter _router = GoRouter(
         final s = int.tryParse(state.pathParameters['s'] ?? '') ?? 1;
         final e = int.tryParse(state.pathParameters['e'] ?? '') ?? 1;
         return PlayerPage(id: id, isMovie: false, season: s, episode: e);
+      },
+    ),
+    GoRoute(
+      path: '/player/anime/:id/:ep/:subOrDub',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+        final ep = int.tryParse(state.pathParameters['ep'] ?? '') ?? 1;
+        final subOrDub = state.pathParameters['subOrDub'] ?? 'sub';
+        return PlayerPage(
+          id: id,
+          isAnime: true,
+          episodeNumber: ep,
+          subOrDub: subOrDub,
+        );
       },
     ),
   ],

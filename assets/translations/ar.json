@@ -24,5 +24,8 @@
     "seasons": "مواسم",
     "episodes": "حلقات",
     "search_tv_shows": "ابحث عن برامج تلفزيونية...",
-    "no_tv_shows_found": "لا توجد برامج تلفزيونية"
+    "no_tv_shows_found": "لا توجد برامج تلفزيونية",
+    "anime": "أنمي",
+    "search_anime": "ابحث عن أنمي...",
+    "no_anime_found": "لا يوجد أنمي"
 }

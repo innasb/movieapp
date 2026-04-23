@@ -54,6 +54,11 @@ class MainPage extends StatelessWidget {
               label: 'tv_shows'.tr(),
             ),
             BottomNavigationBarItem(
+              icon: const Icon(Icons.animation_outlined),
+              activeIcon: const Icon(Icons.animation),
+              label: 'anime'.tr(),
+            ),
+            BottomNavigationBarItem(
               icon: const Icon(Icons.settings_outlined),
               activeIcon: const Icon(Icons.settings),
               label: 'settings'.tr(),

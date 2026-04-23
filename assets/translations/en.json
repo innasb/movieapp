@@ -24,5 +24,8 @@
     "seasons": "Seasons",
     "episodes": "Episodes",
     "search_tv_shows": "Search TV shows...",
-    "no_tv_shows_found": "No TV shows found"
+    "no_tv_shows_found": "No TV shows found",
+    "anime": "Anime",
+    "search_anime": "Search anime...",
+    "no_anime_found": "No anime found"
 }
