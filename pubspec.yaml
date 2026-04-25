@@ -50,6 +50,7 @@ dependencies:
   webview_flutter_android: ^4.10.13
   webview_flutter_wkwebview: ^3.23.8
   webview_flutter_web: ^0.2.3
+  webview_windows: ^0.4.0
   flutter_dotenv: ^5.2.1
 
   # Watch Together

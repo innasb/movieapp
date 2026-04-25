@@ -9,6 +9,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
+import 'package:webview_windows/webview_windows.dart' as win_web;
 import '../../core/utils/config.dart';
 import '../../core/utils/auth_service.dart';
 import '../../data/datasources/room_remote_data_source.dart';
@@ -34,6 +35,8 @@ class WatchRoomPage extends StatefulWidget {
 
 class _WatchRoomPageState extends State<WatchRoomPage> {
   late WebViewController _webCtrl;
+  final win_web.WebviewController _winWebCtrl = win_web.WebviewController();
+  bool _isWinWebInitialized = false;
   bool _isLoading = true;
   bool _chatVisible = false;
   bool _showRoomCode = true;
@@ -59,7 +62,11 @@ class _WatchRoomPageState extends State<WatchRoomPage> {
   }
 
   void _initWebView(String videoUrl) {
-    if (kIsWeb || defaultTargetPlatform == TargetPlatform.windows) {
+    if (defaultTargetPlatform == TargetPlatform.windows) {
+      _initWinWebView(videoUrl);
+      return;
+    }
+    if (kIsWeb) {
       if (_isLoading && mounted) {
         Future.microtask(() {
           if (mounted) setState(() => _isLoading = false);
@@ -101,6 +108,27 @@ class _WatchRoomPageState extends State<WatchRoomPage> {
     ));
 
     _webCtrl.loadRequest(Uri.parse(videoUrl));
+  }
+
+  Future<void> _initWinWebView(String videoUrl) async {
+    try {
+      await _winWebCtrl.initialize();
+      await _winWebCtrl.setBackgroundColor(Colors.black);
+      await _winWebCtrl.loadUrl(videoUrl);
+      
+      // Inject CSS
+      await _winWebCtrl.addScriptToExecuteOnDocumentCreated(_playerCss);
+      
+      if (mounted) {
+        setState(() {
+          _isWinWebInitialized = true;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      // Fallback if WebView2 is missing
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   static const _playerCss = '''
@@ -188,55 +216,60 @@ class _WatchRoomPageState extends State<WatchRoomPage> {
   /// Execute the actual play/pause on the video player.
   void _executePlayPause(bool shouldPlay) {
     final command = shouldPlay ? 'play' : 'pause';
+    final jsCode = '''
+      (function() {
+        var action = "\$command";
+        // 1. Try top-level video
+        var videos = document.querySelectorAll('video');
+        for (var i = 0; i < videos.length; i++) {
+          action === 'play' ? videos[i].play() : videos[i].pause();
+        }
+        // 2. Try inside iframes (same-origin)
+        var frames = document.querySelectorAll('iframe');
+        for (var j = 0; j < frames.length; j++) {
+          try {
+            var fv = frames[j].contentDocument.querySelectorAll('video');
+            for (var k = 0; k < fv.length; k++) {
+              action === 'play' ? fv[k].play() : fv[k].pause();
+            }
+            var nf = frames[j].contentDocument.querySelectorAll('iframe');
+            for (var n = 0; n < nf.length; n++) {
+              try {
+                var nv = nf[n].contentDocument.querySelectorAll('video');
+                for (var m = 0; m < nv.length; m++) {
+                  action === 'play' ? nv[m].play() : nv[m].pause();
+                }
+              } catch(e) {}
+            }
+          } catch(e) {}
+          // Also try postMessage to the iframe
+          try {
+            frames[j].contentWindow.postMessage(JSON.stringify({type: action}), '*');
+            frames[j].contentWindow.postMessage(JSON.stringify({event: 'command', func: action === 'play' ? 'playVideo' : 'pauseVideo'}), '*');
+          } catch(e) {}
+        }
+        // 3. Try clicking play/pause buttons
+        var selectors = ['.jw-icon-playback', '.vjs-play-control', '.plyr__control--overlaid',
+          '[aria-label="Play"]', '[aria-label="Pause"]', '.play-button', '.pause-button'];
+        for (var s = 0; s < selectors.length; s++) {
+          try {
+            var btn = document.querySelector(selectors[s]);
+            if (btn) { btn.click(); break; }
+          } catch(e) {}
+        }
+      })();
+    ''';
 
     if (kIsWeb) {
       // Web: send postMessage command to the wrapper iframe
       sendPlayerCommand(command);
-    } else if (defaultTargetPlatform != TargetPlatform.windows && !_isLoading) {
+    } else if (defaultTargetPlatform == TargetPlatform.windows) {
+      if (_isWinWebInitialized) {
+        _winWebCtrl.executeScript(jsCode);
+      }
+    } else if (!_isLoading) {
       // Mobile: directly control the video via JavaScript injection
-      _webCtrl.runJavaScript('''
-        (function() {
-          var action = "$command";
-          // 1. Try top-level video
-          var videos = document.querySelectorAll('video');
-          for (var i = 0; i < videos.length; i++) {
-            action === 'play' ? videos[i].play() : videos[i].pause();
-          }
-          // 2. Try inside iframes (same-origin)
-          var frames = document.querySelectorAll('iframe');
-          for (var j = 0; j < frames.length; j++) {
-            try {
-              var fv = frames[j].contentDocument.querySelectorAll('video');
-              for (var k = 0; k < fv.length; k++) {
-                action === 'play' ? fv[k].play() : fv[k].pause();
-              }
-              var nf = frames[j].contentDocument.querySelectorAll('iframe');
-              for (var n = 0; n < nf.length; n++) {
-                try {
-                  var nv = nf[n].contentDocument.querySelectorAll('video');
-                  for (var m = 0; m < nv.length; m++) {
-                    action === 'play' ? nv[m].play() : nv[m].pause();
-                  }
-                } catch(e) {}
-              }
-            } catch(e) {}
-            // Also try postMessage to the iframe
-            try {
-              frames[j].contentWindow.postMessage(JSON.stringify({type: action}), '*');
-              frames[j].contentWindow.postMessage(JSON.stringify({event: 'command', func: action === 'play' ? 'playVideo' : 'pauseVideo'}), '*');
-            } catch(e) {}
-          }
-          // 3. Try clicking play/pause buttons
-          var selectors = ['.jw-icon-playback', '.vjs-play-control', '.plyr__control--overlaid',
-            '[aria-label="Play"]', '[aria-label="Pause"]', '.play-button', '.pause-button'];
-          for (var s = 0; s < selectors.length; s++) {
-            try {
-              var btn = document.querySelector(selectors[s]);
-              if (btn) { btn.click(); break; }
-            } catch(e) {}
-          }
-        })();
-      ''');
+      _webCtrl.runJavaScript(jsCode);
     }
   }
 
@@ -296,7 +329,12 @@ class _WatchRoomPageState extends State<WatchRoomPage> {
                         child: kIsWeb 
                           ? buildWebPlayer(url) 
                           : defaultTargetPlatform == TargetPlatform.windows
-                              ? const Center(child: Text('WebView is not supported on Windows yet. You can still use chat and voice/video calling!', textAlign: TextAlign.center, style: TextStyle(color: Colors.white70)))
+                              ? _isWinWebInitialized
+                                  ? win_web.Webview(_winWebCtrl)
+                                  : const Center(child: Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Text('WebView2 runtime is missing or failed to initialize.\\nVideo playback is not supported.\\nYou can still use chat and voice/video calling!', textAlign: TextAlign.center, style: TextStyle(color: Colors.white70)),
+                                    ))
                               : WebViewWidget(controller: _webCtrl),
                       ),
                       _buildBottomBar(ctx, state, isDark),
