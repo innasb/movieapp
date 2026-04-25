@@ -27,5 +27,19 @@
     "no_tv_shows_found": "لا توجد برامج تلفزيونية",
     "anime": "أنمي",
     "search_anime": "ابحث عن أنمي...",
-    "no_anime_found": "لا يوجد أنمي"
+    "no_anime_found": "لا يوجد أنمي",
+    "watch_together": "شاهد معًا",
+    "watch_together_desc": "شاهد مع صديق بتزامن تام. أنشئ غرفة أو انضم لواحدة!",
+    "create_room": "إنشاء غرفة",
+    "create_room_desc": "ابدأ غرفة جديدة وادعُ صديقًا",
+    "join_room": "الانضمام لغرفة",
+    "join_room_desc": "أدخل رمز الغرفة للانضمام إلى صديقك",
+    "create_and_share": "إنشاء ومشاركة",
+    "or": "أو",
+    "enter_valid_code": "يرجى إدخال رمز مكون من 6 أحرف",
+    "watch_together_info": "سيتم إيقاف الشاشتين إذا توقف أحدهما أو فقد الاتصال.",
+    "leave_room": "مغادرة الغرفة",
+    "leave_room_confirm": "هل أنت متأكد من مغادرة هذه الغرفة؟",
+    "cancel": "إلغاء",
+    "leave": "مغادرة"
 }

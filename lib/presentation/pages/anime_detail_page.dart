@@ -164,6 +164,38 @@ class AnimeDetailPage extends StatelessWidget {
                                 .toList(),
                           ),
 
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 52,
+                            child: OutlinedButton(
+                              onPressed: () {
+                                context.push('/watch-together/anime/$malId');
+                              },
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFFE50914),
+                                side: const BorderSide(color: Color(0xFFE50914), width: 1.5),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.people_alt_rounded, size: 24),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    'watch_together'.tr(),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
                           const SizedBox(height: 24),
                           Text(
                             'overview'.tr(),

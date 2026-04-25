@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'core/theme/app_theme.dart';
 import 'injection_container.dart' as di;
 import 'presentation/cubits/settings_cubit.dart';
@@ -16,13 +18,25 @@ import 'presentation/pages/tv_shows_page.dart';
 import 'presentation/pages/tv_show_detail_page.dart';
 import 'presentation/pages/anime_page.dart';
 import 'presentation/pages/anime_detail_page.dart';
+import 'presentation/pages/watch_together_page.dart';
+import 'presentation/pages/watch_room_page.dart';
+
+import 'core/utils/webview_registry.dart' if (dart.library.html) 'core/utils/webview_registry_web.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  registerWebViewWeb();
   await EasyLocalization.ensureInitialized();
   await dotenv.load(fileName: ".env");
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase already initialized: $e');
+  }
   await di.init();
 
   runApp(
@@ -133,6 +147,30 @@ final GoRouter _router = GoRouter(
           episodeNumber: ep,
           subOrDub: subOrDub,
         );
+      },
+    ),
+    GoRoute(
+      path: '/watch-together/:contentType/:id',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final contentType = state.pathParameters['contentType']!;
+        final id = int.parse(state.pathParameters['id']!);
+        final s = int.tryParse(state.uri.queryParameters['s'] ?? '');
+        final e = int.tryParse(state.uri.queryParameters['e'] ?? '');
+        final sub = state.uri.queryParameters['sub'];
+        final title = state.uri.queryParameters['title'];
+        return WatchTogetherPage(
+          contentId: id, contentType: contentType,
+          season: s, episode: e, subOrDub: sub, contentTitle: title,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/room/:roomId',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final roomId = state.pathParameters['roomId']!;
+        return WatchRoomPage(roomId: roomId);
       },
     ),
   ],

@@ -27,5 +27,19 @@
     "no_tv_shows_found": "No TV shows found",
     "anime": "Anime",
     "search_anime": "Search anime...",
-    "no_anime_found": "No anime found"
+    "no_anime_found": "No anime found",
+    "watch_together": "Watch Together",
+    "watch_together_desc": "Watch with a friend in perfect sync. Create a room or join one!",
+    "create_room": "Create Room",
+    "create_room_desc": "Start a new room and invite a friend",
+    "join_room": "Join Room",
+    "join_room_desc": "Enter a room code to join your friend",
+    "create_and_share": "Create & Share",
+    "or": "OR",
+    "enter_valid_code": "Please enter a valid 6-character code",
+    "watch_together_info": "Both screens will be paused if one person stops or loses connection.",
+    "leave_room": "Leave Room",
+    "leave_room_confirm": "Are you sure you want to leave this room?",
+    "cancel": "Cancel",
+    "leave": "Leave"
 }

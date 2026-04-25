@@ -40,6 +40,13 @@ import 'domain/usecases/get_anime_detail.dart';
 import 'presentation/cubits/anime_cubit.dart';
 import 'presentation/cubits/anime_detail_cubit.dart';
 
+// Watch Together imports
+import 'data/datasources/room_remote_data_source.dart';
+import 'data/datasources/chat_remote_data_source.dart';
+import 'presentation/cubits/watch_room_cubit.dart';
+import 'presentation/cubits/chat_cubit.dart';
+import 'presentation/cubits/call_cubit.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -98,6 +105,18 @@ Future<void> init() async {
     ),
   );
 
+  // Watch Together Cubits
+  sl.registerFactory(
+    () => WatchRoomCubit(
+      roomDataSource: sl(),
+      chatDataSource: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => ChatCubit(chatDataSource: sl()),
+  );
+  sl.registerFactory(() => CallCubit());
+
   // Use Cases
   sl.registerLazySingleton(() => GetRecentMovies(sl()));
   sl.registerLazySingleton(() => GetTrendingMovies(sl()));
@@ -135,4 +154,8 @@ Future<void> init() async {
 
   // Core
   sl.registerLazySingleton(() => ApiClient(sl()));
+
+  // Watch Together Data Sources
+  sl.registerLazySingleton(() => RoomRemoteDataSource());
+  sl.registerLazySingleton(() => ChatRemoteDataSource());
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter/foundation.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 import '../../core/utils/config.dart';
@@ -119,10 +120,10 @@ class _PlayerPageState extends State<PlayerPage> {
           .setMediaPlaybackRequiresUserGesture(false);
     }
 
-    _controller
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.black)
-      ..setNavigationDelegate(
+    if (!kIsWeb) {
+      _controller.setJavaScriptMode(JavaScriptMode.unrestricted);
+      _controller.setBackgroundColor(Colors.black);
+      _controller.setNavigationDelegate(
         NavigationDelegate(
           onNavigationRequest: (request) {
             // Block navigations to ad / external domains
@@ -140,8 +141,16 @@ class _PlayerPageState extends State<PlayerPage> {
             }
           },
         ),
-      )
-      ..loadRequest(Uri.parse(videoUrl));
+      );
+    } else {
+      if (_isLoading && mounted) {
+        Future.microtask(() {
+          if (mounted) setState(() => _isLoading = false);
+        });
+      }
+    }
+
+    _controller.loadRequest(Uri.parse(videoUrl));
   }
 
   Future<bool> _onWillPop() async {

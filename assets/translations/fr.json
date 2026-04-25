@@ -27,5 +27,19 @@
     "no_tv_shows_found": "Aucune série TV trouvée",
     "anime": "Anime",
     "search_anime": "Rechercher des anime...",
-    "no_anime_found": "Aucun anime trouvé"
+    "no_anime_found": "Aucun anime trouvé",
+    "watch_together": "Regarder ensemble",
+    "watch_together_desc": "Regardez avec un ami en parfaite synchronisation. Créez une salle ou rejoignez-en une !",
+    "create_room": "Créer une salle",
+    "create_room_desc": "Démarrez une nouvelle salle et invitez un ami",
+    "join_room": "Rejoindre une salle",
+    "join_room_desc": "Entrez un code de salle pour rejoindre votre ami",
+    "create_and_share": "Créer et partager",
+    "or": "OU",
+    "enter_valid_code": "Veuillez entrer un code valide de 6 caractères",
+    "watch_together_info": "Les deux écrans seront mis en pause si l'un s'arrête ou perd la connexion.",
+    "leave_room": "Quitter la salle",
+    "leave_room_confirm": "Êtes-vous sûr de vouloir quitter cette salle ?",
+    "cancel": "Annuler",
+    "leave": "Quitter"
 }

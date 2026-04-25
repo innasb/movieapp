@@ -49,7 +49,21 @@ dependencies:
   easy_localization: ^3.0.8
   webview_flutter_android: ^4.10.13
   webview_flutter_wkwebview: ^3.23.8
+  webview_flutter_web: ^0.2.3
   flutter_dotenv: ^5.2.1
+
+  # Watch Together
+  firebase_core: ^3.13.0
+  firebase_database: ^11.3.5
+  cloud_firestore: ^5.6.7
+  firebase_auth: ^5.5.3
+  flutter_webrtc: ^0.12.12
+  uuid: ^4.5.1
+  share_plus: ^12.0.1
+  video_player: ^2.11.1
+  universal_html: ^2.3.0
+  pointer_interceptor: ^0.10.1+2
+  permission_handler: ^12.0.1
 
 dev_dependencies:
   flutter_test:
