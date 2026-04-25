@@ -59,6 +59,15 @@ class _WatchRoomPageState extends State<WatchRoomPage> {
   }
 
   void _initWebView(String videoUrl) {
+    if (kIsWeb || defaultTargetPlatform == TargetPlatform.windows) {
+      if (_isLoading && mounted) {
+        Future.microtask(() {
+          if (mounted) setState(() => _isLoading = false);
+        });
+      }
+      return;
+    }
+
     late final PlatformWebViewControllerCreationParams params;
     if (WebViewPlatform.instance is WebKitWebViewPlatform) {
       params = WebKitWebViewControllerCreationParams(
@@ -77,27 +86,19 @@ class _WatchRoomPageState extends State<WatchRoomPage> {
           .setMediaPlaybackRequiresUserGesture(false);
     }
 
-    if (!kIsWeb) {
-      _webCtrl.setJavaScriptMode(JavaScriptMode.unrestricted);
-      _webCtrl.setBackgroundColor(Colors.black);
-      _webCtrl.setNavigationDelegate(NavigationDelegate(
-        onNavigationRequest: (req) {
-          if (_isAllowedUrl(req.url)) return NavigationDecision.navigate;
-          return NavigationDecision.prevent;
-        },
-        onPageFinished: (_) {
-          _webCtrl.runJavaScript(_playerCss);
-          if (_isLoading && mounted) setState(() => _isLoading = false);
-        },
+    _webCtrl.setJavaScriptMode(JavaScriptMode.unrestricted);
+    _webCtrl.setBackgroundColor(Colors.black);
+    _webCtrl.setNavigationDelegate(NavigationDelegate(
+      onNavigationRequest: (req) {
+        if (_isAllowedUrl(req.url)) return NavigationDecision.navigate;
+        return NavigationDecision.prevent;
+      },
+      onPageFinished: (_) {
+        _webCtrl.runJavaScript(_playerCss);
+        if (_isLoading && mounted) setState(() => _isLoading = false);
+      },
 
-      ));
-    } else {
-      if (_isLoading && mounted) {
-        Future.microtask(() {
-          if (mounted) setState(() => _isLoading = false);
-        });
-      }
-    }
+    ));
 
     _webCtrl.loadRequest(Uri.parse(videoUrl));
   }
@@ -191,7 +192,7 @@ class _WatchRoomPageState extends State<WatchRoomPage> {
     if (kIsWeb) {
       // Web: send postMessage command to the wrapper iframe
       sendPlayerCommand(command);
-    } else if (!_isLoading) {
+    } else if (defaultTargetPlatform != TargetPlatform.windows && !_isLoading) {
       // Mobile: directly control the video via JavaScript injection
       _webCtrl.runJavaScript('''
         (function() {
@@ -294,7 +295,9 @@ class _WatchRoomPageState extends State<WatchRoomPage> {
                       Expanded(
                         child: kIsWeb 
                           ? buildWebPlayer(url) 
-                          : WebViewWidget(controller: _webCtrl),
+                          : defaultTargetPlatform == TargetPlatform.windows
+                              ? const Center(child: Text('WebView is not supported on Windows yet. You can still use chat and voice/video calling!', textAlign: TextAlign.center, style: TextStyle(color: Colors.white70)))
+                              : WebViewWidget(controller: _webCtrl),
                       ),
                       _buildBottomBar(ctx, state, isDark),
                     ]),

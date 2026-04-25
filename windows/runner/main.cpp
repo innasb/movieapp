@@ -2,6 +2,10 @@
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
 
+extern "C" {
+    __declspec(selectany) int _Avx2WmemEnabled = 0;
+}
+
 #include "flutter_window.h"
 #include "utils.h"
 
