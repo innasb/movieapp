@@ -1,11 +1,11 @@
 {
-    "name": "movie_app",
-    "short_name": "movie_app",
+    "name": "Watchy",
+    "short_name": "Watchy",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#0D0D1A",
+    "theme_color": "#00B4D8",
+    "description": "Watch movies and shows together with friends in real-time.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -20,6 +20,7 @@ import 'presentation/pages/anime_page.dart';
 import 'presentation/pages/anime_detail_page.dart';
 import 'presentation/pages/watch_together_page.dart';
 import 'presentation/pages/watch_room_page.dart';
+import 'presentation/pages/splash_screen.dart';
 
 import 'core/utils/webview_registry.dart' if (dart.library.html) 'core/utils/webview_registry_web.dart';
 
@@ -54,8 +55,13 @@ void main() async {
 
 final GoRouter _router = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/',
+  initialLocation: '/splash',
   routes: [
+    GoRoute(
+      path: '/splash',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const SplashScreen(),
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return MainPage(navigationShell: navigationShell);
