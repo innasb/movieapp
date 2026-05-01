@@ -33,6 +33,15 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  <script>
+    // Prevent malicious iframes from redirecting the top-level app
+    window.addEventListener('beforeunload', function (e) {
+      // Prompting the user blocks automatic redirects from ads
+      e.preventDefault();
+      e.returnValue = 'Leave the app?';
+      return 'Leave the app?';
+    });
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

@@ -97,16 +97,19 @@ class _WatchRoomPageState extends State<WatchRoomPage> {
     _webCtrl.setBackgroundColor(Colors.black);
     _webCtrl.setNavigationDelegate(NavigationDelegate(
       onNavigationRequest: (req) {
-        if (_isAllowedUrl(req.url)) return NavigationDecision.navigate;
+        if (_isAllowedUrl(req.url)) {
+          if (req.isMainFrame && !_isAllowedUrl(req.url)) return NavigationDecision.prevent; // Redundant but explicit
+          return NavigationDecision.navigate;
+        }
+        
+        debugPrint('⛔ Blocked ad navigation: \${req.url}');
         return NavigationDecision.prevent;
       },
       onPageFinished: (_) {
         _webCtrl.runJavaScript(_playerCss);
         if (_isLoading && mounted) setState(() => _isLoading = false);
       },
-
     ));
-
     _webCtrl.loadRequest(Uri.parse(videoUrl));
   }
 
@@ -139,17 +142,43 @@ class _WatchRoomPageState extends State<WatchRoomPage> {
         iframe{border:none!important;width:100%!important;height:100%!important;
         position:absolute!important;top:0!important;left:0!important}\`;
       document.head.appendChild(s);
+      
+      // Block popups and redirects
+      window.open = function() { return null; };
+      window.alert = function() {};
+      window.confirm = function() { return false; };
+      try { Object.freeze(window.location); } catch(e) {}
+      
+      // Periodic cleanup of injected ad iframes
+      setInterval(function() {
+        try {
+          var adSelectors = ['div[style*="z-index: 9999"]', 'a[target="_blank"]'];
+          adSelectors.forEach(function(sel) {
+            document.querySelectorAll(sel).forEach(function(el) { if (el.tagName !== 'IFRAME') el.remove(); });
+          });
+        } catch(e) {}
+      }, 3000);
     })();
   ''';
 
   String _buildVideoUrl(WatchRoomActive state) {
     final room = state.room;
-    if (room.contentType == 'anime') {
-      return '${Config.vidlinkBaseUrl}/anime/${room.contentId}/${room.episode ?? 1}/${room.subOrDub ?? "sub"}?primaryColor=E50914&autoplay=true&fallback=true';
-    } else if (room.contentType == 'movie') {
-      return '${Config.vidlinkBaseUrl}/movie/${room.contentId}?primaryColor=E50914&autoplay=true';
+    if (kIsWeb) {
+      if (room.contentType == 'anime') {
+        return '${Config.vidlinkBaseUrl}/anime/${room.contentId}/${room.episode ?? 1}/${room.subOrDub ?? "sub"}?primaryColor=E50914&autoplay=true&fallback=true';
+      } else if (room.contentType == 'movie') {
+        return '${Config.vidlinkBaseUrl}/movie/${room.contentId}?primaryColor=E50914&autoplay=true';
+      } else {
+        return '${Config.vidlinkBaseUrl}/tv/${room.contentId}/${room.season ?? 1}/${room.episode ?? 1}?primaryColor=E50914&autoplay=true&nextbutton=true';
+      }
     } else {
-      return '${Config.vidlinkBaseUrl}/tv/${room.contentId}/${room.season ?? 1}/${room.episode ?? 1}?primaryColor=E50914&autoplay=true&nextbutton=true';
+      if (room.contentType == 'anime') {
+        return '${Config.vidlinkBaseUrl}/anime/${room.contentId}/${room.episode ?? 1}/${room.subOrDub ?? "sub"}?primaryColor=E50914&autoplay=true&fallback=true';
+      } else if (room.contentType == 'movie') {
+        return '${Config.vidlinkBaseUrl}/movie/${room.contentId}?primaryColor=E50914&autoplay=true';
+      } else {
+        return '${Config.vidlinkBaseUrl}/tv/${room.contentId}/${room.season ?? 1}/${room.episode ?? 1}?primaryColor=E50914&autoplay=true&nextbutton=true';
+      }
     }
   }
 

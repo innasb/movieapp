@@ -4,6 +4,8 @@ import 'package:talker_bloc_logger/talker_bloc_logger.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/network/api_client.dart';
+import 'core/services/search_history_service.dart';
+import 'core/services/notification_service.dart';
 import 'data/datasources/movie_remote_data_source.dart';
 import 'data/repositories/movie_repository_impl.dart';
 import 'domain/repositories/movie_repository.dart';
@@ -154,6 +156,8 @@ Future<void> init() async {
 
   // Core
   sl.registerLazySingleton(() => ApiClient(sl()));
+  sl.registerLazySingleton(() => SearchHistoryService(sl()));
+  sl.registerLazySingleton(() => NotificationService());
 
   // Watch Together Data Sources
   sl.registerLazySingleton(() => RoomRemoteDataSource());

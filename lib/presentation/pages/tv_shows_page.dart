@@ -7,6 +7,7 @@ import '../cubits/tv_shows_state.dart';
 import '../widgets/tv_show_card.dart';
 import '../widgets/error_display.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/services/search_history_service.dart';
 
 class TvShowsPage extends StatelessWidget {
   const TvShowsPage({super.key});
@@ -30,18 +31,32 @@ class _TvShowsView extends StatefulWidget {
 class _TvShowsViewState extends State<_TvShowsView> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  final SearchHistoryService _searchHistoryService = sl<SearchHistoryService>();
   bool _showSearch = false;
+  List<String> _searchHistory = [];
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    _loadSearchHistory();
+    _searchFocusNode.addListener(() {
+      setState(() {});
+    });
+  }
+
+  void _loadSearchHistory() {
+    setState(() {
+      _searchHistory = _searchHistoryService.getHistory();
+    });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -57,9 +72,21 @@ class _TvShowsViewState extends State<_TvShowsView> {
       _showSearch = !_showSearch;
       if (!_showSearch) {
         _searchController.clear();
+        _searchFocusNode.unfocus();
         context.read<TvShowsCubit>().clearSearch();
+      } else {
+        _searchFocusNode.requestFocus();
       }
     });
+  }
+
+  void _submitSearch(String query) {
+    if (query.trim().isNotEmpty) {
+      _searchHistoryService.addQuery(query.trim());
+      _loadSearchHistory();
+      context.read<TvShowsCubit>().onSearchChanged(query);
+      _searchFocusNode.unfocus();
+    }
   }
 
   @override
@@ -69,10 +96,13 @@ class _TvShowsViewState extends State<_TvShowsView> {
         title: _showSearch
             ? TextField(
                 controller: _searchController,
+                focusNode: _searchFocusNode,
                 autofocus: true,
                 style: TextStyle(
                   color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
+                textInputAction: TextInputAction.search,
+                onSubmitted: _submitSearch,
                 decoration: InputDecoration(
                   hintText: 'search_tv_shows'.tr(),
                   hintStyle: TextStyle(
@@ -91,11 +121,13 @@ class _TvShowsViewState extends State<_TvShowsView> {
                     onPressed: () {
                       _searchController.clear();
                       context.read<TvShowsCubit>().clearSearch();
+                      setState(() {});
                     },
                   ),
                 ),
                 onChanged: (query) {
                   context.read<TvShowsCubit>().onSearchChanged(query);
+                  setState(() {});
                 },
               )
             : Text(
@@ -116,6 +148,17 @@ class _TvShowsViewState extends State<_TvShowsView> {
             ),
             onPressed: _toggleSearch,
           ),
+          if (!_showSearch)
+            IconButton(
+              icon: Icon(
+                Icons.notifications_outlined,
+                color: Theme.of(context).iconTheme.color ??
+                    Theme.of(context).textTheme.bodyLarge?.color,
+              ),
+              onPressed: () {
+                context.push('/notifications');
+              },
+            ),
           const SizedBox(width: 8),
         ],
       ),
@@ -135,7 +178,7 @@ class _TvShowsViewState extends State<_TvShowsView> {
                 controller: _scrollController,
                 slivers: [
                   // Empty state for search
-                  if (state.isSearchMode && state.shows.isEmpty)
+                  if (state.isSearchMode && state.shows.isEmpty && _searchController.text.isNotEmpty)
                     SliverFillRemaining(
                       hasScrollBody: false,
                       child: Center(
@@ -161,6 +204,60 @@ class _TvShowsViewState extends State<_TvShowsView> {
                             ),
                           ],
                         ),
+                      ),
+                    )
+                  else if (_showSearch && _searchController.text.isEmpty && _searchHistory.isNotEmpty)
+                    SliverToBoxAdapter(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'recent_searches'.tr(),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Theme.of(context).textTheme.titleMedium?.color,
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () async {
+                                    await _searchHistoryService.clearHistory();
+                                    _loadSearchHistory();
+                                  },
+                                  child: Text('clear'.tr()),
+                                ),
+                              ],
+                            ),
+                          ),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _searchHistory.length,
+                            itemBuilder: (context, index) {
+                              final query = _searchHistory[index];
+                              return ListTile(
+                                leading: const Icon(Icons.history),
+                                title: Text(query),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.close, size: 16),
+                                  onPressed: () async {
+                                    await _searchHistoryService.removeQuery(query);
+                                    _loadSearchHistory();
+                                  },
+                                ),
+                                onTap: () {
+                                  _searchController.text = query;
+                                  _submitSearch(query);
+                                },
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     )
                   else if (state.isSearchMode) ...[

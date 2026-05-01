@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'core/theme/app_theme.dart';
+import 'core/services/notification_service.dart';
 import 'injection_container.dart' as di;
 import 'presentation/cubits/settings_cubit.dart';
 import 'presentation/cubits/settings_state.dart';
@@ -21,6 +22,7 @@ import 'presentation/pages/anime_detail_page.dart';
 import 'presentation/pages/watch_together_page.dart';
 import 'presentation/pages/watch_room_page.dart';
 import 'presentation/pages/splash_screen.dart';
+import 'presentation/pages/notifications_page.dart';
 
 import 'core/utils/webview_registry.dart' if (dart.library.html) 'core/utils/webview_registry_web.dart';
 
@@ -39,6 +41,7 @@ void main() async {
     debugPrint('Firebase already initialized: $e');
   }
   await di.init();
+  await di.sl<NotificationService>().init();
 
   runApp(
     EasyLocalization(
@@ -178,6 +181,11 @@ final GoRouter _router = GoRouter(
         final roomId = state.pathParameters['roomId']!;
         return WatchRoomPage(roomId: roomId);
       },
+    ),
+    GoRoute(
+      path: '/notifications',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const NotificationsPage(),
     ),
   ],
 );

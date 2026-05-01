@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 import '../../core/utils/config.dart';
+import '../widgets/web_player.dart';
 
 class PlayerPage extends StatefulWidget {
   final int id; // TMDB ID or MAL ID
@@ -32,6 +33,7 @@ class PlayerPage extends StatefulWidget {
 class _PlayerPageState extends State<PlayerPage> {
   late final WebViewController _controller;
   bool _isLoading = true;
+  late final String _videoUrl;
 
   // Domains allowed to load (the video source + its CDNs)
   static const _allowedHosts = [
@@ -70,6 +72,22 @@ class _PlayerPageState extends State<PlayerPage> {
         }
       `;
       document.head.appendChild(style);
+      
+      // Block popups and redirects
+      window.open = function() { return null; };
+      window.alert = function() {};
+      window.confirm = function() { return false; };
+      try { Object.freeze(window.location); } catch(e) {}
+      
+      // Periodic cleanup of injected ad iframes
+      setInterval(function() {
+        try {
+          var adSelectors = ['div[style*="z-index: 9999"]', 'a[target="_blank"]'];
+          adSelectors.forEach(function(sel) {
+            document.querySelectorAll(sel).forEach(function(el) { if (el.tagName !== 'IFRAME') el.remove(); });
+          });
+        } catch(e) {}
+      }, 3000);
     })();
   ''';
 
@@ -93,13 +111,22 @@ class _PlayerPageState extends State<PlayerPage> {
   void initState() {
     super.initState();
 
-    final String videoUrl;
-    if (widget.isAnime) {
-      videoUrl = '${Config.vidlinkBaseUrl}/anime/${widget.id}/${widget.episodeNumber}/${widget.subOrDub}?primaryColor=E50914&autoplay=true&fallback=true';
-    } else if (widget.isMovie) {
-      videoUrl = '${Config.vidlinkBaseUrl}/movie/${widget.id}?primaryColor=E50914&autoplay=true';
+    if (kIsWeb) {
+      if (widget.isAnime) {
+        _videoUrl = '${Config.vidlinkBaseUrl}/anime/${widget.id}/${widget.episodeNumber}/${widget.subOrDub}?primaryColor=E50914&autoplay=true&fallback=true';
+      } else if (widget.isMovie) {
+        _videoUrl = '${Config.vidlinkBaseUrl}/movie/${widget.id}?primaryColor=E50914&autoplay=true';
+      } else {
+        _videoUrl = '${Config.vidlinkBaseUrl}/tv/${widget.id}/${widget.season}/${widget.episode}?primaryColor=E50914&autoplay=true&nextbutton=true';
+      }
     } else {
-      videoUrl = '${Config.vidlinkBaseUrl}/tv/${widget.id}/${widget.season}/${widget.episode}?primaryColor=E50914&autoplay=true&nextbutton=true';
+      if (widget.isAnime) {
+        _videoUrl = '${Config.vidlinkBaseUrl}/anime/${widget.id}/${widget.episodeNumber}/${widget.subOrDub}?primaryColor=E50914&autoplay=true&fallback=true';
+      } else if (widget.isMovie) {
+        _videoUrl = '${Config.vidlinkBaseUrl}/movie/${widget.id}?primaryColor=E50914&autoplay=true';
+      } else {
+        _videoUrl = '${Config.vidlinkBaseUrl}/tv/${widget.id}/${widget.season}/${widget.episode}?primaryColor=E50914&autoplay=true&nextbutton=true';
+      }
     }
 
     late final PlatformWebViewControllerCreationParams params;
@@ -150,7 +177,9 @@ class _PlayerPageState extends State<PlayerPage> {
       }
     }
 
-    _controller.loadRequest(Uri.parse(videoUrl));
+    if (!kIsWeb) {
+      _controller.loadRequest(Uri.parse(_videoUrl));
+    }
   }
 
   Future<bool> _onWillPop() async {
@@ -177,7 +206,10 @@ class _PlayerPageState extends State<PlayerPage> {
         body: SafeArea(
           child: Stack(
             children: [
-              WebViewWidget(controller: _controller),
+              if (kIsWeb)
+                buildWebPlayer(_videoUrl)
+              else
+                WebViewWidget(controller: _controller),
               if (_isLoading)
                 const Center(
                   child: CircularProgressIndicator(color: Colors.white),
