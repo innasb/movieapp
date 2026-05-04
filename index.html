@@ -41,6 +41,18 @@
       e.returnValue = 'Leave the app?';
       return 'Leave the app?';
     });
+
+    // Manually register the Firebase Messaging Service Worker so it respects the base href
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('firebase-messaging-sw.js', { scope: './' })
+          .then(function (registration) {
+            console.log('Firebase ServiceWorker registration successful with scope: ', registration.scope);
+          }).catch(function (err) {
+            console.log('Firebase ServiceWorker registration failed: ', err);
+          });
+      });
+    }
   </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
