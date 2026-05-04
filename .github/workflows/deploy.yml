@@ -30,6 +30,9 @@ jobs:
       - name: Build Web 🏗️
         run: flutter build web --release --base-href "/movieapp/"
 
+      - name: Create .nojekyll file 📄
+        run: touch build/web/.nojekyll
+
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
