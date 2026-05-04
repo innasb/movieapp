@@ -88,8 +88,17 @@ class NotificationService {
     });
 
     // 4. Get FCM Token (optional, for sending messages to this device specifically)
-    String? token = await _firebaseMessaging.getToken();
-    debugPrint('FCM Token: $token');
+    if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional) {
+      try {
+        String? token = await _firebaseMessaging.getToken();
+        debugPrint('FCM Token: $token');
+      } catch (e) {
+        debugPrint('Failed to get FCM token: $e');
+      }
+    } else {
+      debugPrint('FCM Token not requested because permission was denied.');
+    }
   }
 
   /// Fire a local test notification to verify the notification pipeline works.
